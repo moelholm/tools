@@ -65,14 +65,14 @@ public class MediaOrganizerIntegrationTest {
 
     @After
     public void after() {
-         deleteTestDataDirectory(from);
-         deleteTestDataDirectory(to);
+        deleteTestDataDirectory(from);
+        deleteTestDataDirectory(to);
     }
 
     @Before
     public void before() throws IOException {
-        from = createDirectoryAndReturnPath("target/testground-from");
-        to = createDirectoryAndReturnPath("target/testground-to");
+        from = createTestDirectoryAndReturnPath("target/testground-from");
+        to = createTestDirectoryAndReturnPath("target/testground-to");
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ public class MediaOrganizerIntegrationTest {
         }
     }
 
-    private Path createDirectoryAndReturnPath(String pathAsString) {
+    private Path createTestDirectoryAndReturnPath(String pathAsString) {
         Path path = Paths.get(pathAsString);
         if (path.toFile().exists()) {// A-nasty-little-site-effect-ok-for-testing-!-:)-
             deleteTestDataDirectory(path);
