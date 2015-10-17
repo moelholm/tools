@@ -65,8 +65,8 @@ public class MediaOrganizerIntegrationTest {
 
     @After
     public void after() {
-        // deleteTestDataDirectory(from);
-        // deleteTestDataDirectory(to);
+         deleteTestDataDirectory(from);
+         deleteTestDataDirectory(to);
     }
 
     @Before
