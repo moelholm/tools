@@ -45,11 +45,10 @@ public class MediaOrganizer {
                     Path destinationFolderPath = to.resolve(generateRealFolderName(folderName, mediaFilePaths));
                     mediaFilePaths.stream().forEach(p -> {
                         Path destinationFilePath = destinationFolderPath.resolve(p.getFileName());
-                        LOG.info(destinationFilePath.toString());
+                        LOG.info("    {}", destinationFilePath.toString());
                         if (destinationFilePath.toFile().exists()) {
-                            LOG.info("File [{}] exists at destination folder - so skipping that", destinationFilePath);
+                            LOG.info("File [{}] exists at destination folder - so skipping that", destinationFilePath.getFileName());
                         } else {
-
                         }
                     });
                 });
@@ -89,7 +88,7 @@ public class MediaOrganizer {
         dateCal.setTime(date);
 
         int year = dateCal.get(Calendar.YEAR);
-        String month = new DateFormatSymbols(configuration.getLocale()).getMonths()[dateCal.get(Calendar.MONTH) - 1];
+        String month = new DateFormatSymbols(configuration.getLocale()).getMonths()[dateCal.get(Calendar.MONTH)];
         month = Character.toUpperCase(month.charAt(0)) + month.substring(1);
         int day = dateCal.get(Calendar.DAY_OF_MONTH);
 
@@ -100,7 +99,7 @@ public class MediaOrganizer {
         String lastPartOfFolderName = "( - \\d+)$";
         String replaceWithNewLastPartOfFolderName;
         if (mediaFilePaths.size() >= configuration.getAmountOfMediaFilesIndicatingAnEvent()) {
-            replaceWithNewLastPartOfFolderName = String.format(" $1 - %s", configuration.getSuffixForDestinationFolderOfUnknownEventMediaFiles());
+            replaceWithNewLastPartOfFolderName = String.format("$1 - %s", configuration.getSuffixForDestinationFolderOfUnknownEventMediaFiles());
         } else {
             replaceWithNewLastPartOfFolderName = String.format(" - %s", configuration.getSuffixForDestinationFolderOfMiscMediaFiles());
         }
