@@ -34,6 +34,10 @@ public class MediaOrganizer {
     private MediaOrganizerConfiguration configuration;
 
     @Async
+    public void undoFlatMessAsync(Path from, Path to) {
+        undoFlatMess(from, to);
+    }
+
     public void undoFlatMess(Path from, Path to) {
         LOG.info("Copying files from [{}] to [{}]", from, to);
 
@@ -45,10 +49,11 @@ public class MediaOrganizer {
                     Path destinationFolderPath = to.resolve(generateRealFolderName(folderName, mediaFilePaths));
                     mediaFilePaths.stream().forEach(p -> {
                         Path destinationFilePath = destinationFolderPath.resolve(p.getFileName());
-                        LOG.info("    {}", destinationFilePath.toString());
+                        LOG.info("    {}", destinationFilePath.getFileName());
                         if (destinationFilePath.toFile().exists()) {
                             LOG.info("File [{}] exists at destination folder - so skipping that", destinationFilePath.getFileName());
                         } else {
+                            copyFile(p, destinationFolderPath.resolve(p.getFileName()));
                         }
                     });
                 });
@@ -116,12 +121,12 @@ public class MediaOrganizer {
         }
     }
 
-    @SuppressWarnings("unused")
-    private void move(Path fromFile, Path toFile) {
+    private void copyFile(Path fromFilePath, Path toFilePath) {
         try {
-            Files.copy(fromFile, toFile, REPLACE_EXISTING, COPY_ATTRIBUTES, NOFOLLOW_LINKS);
+            toFilePath.toFile().mkdirs();
+            Files.copy(fromFilePath, toFilePath, REPLACE_EXISTING, COPY_ATTRIBUTES, NOFOLLOW_LINKS);
         } catch (IOException e) {
-            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", fromFile, toFile), e);
+            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", fromFilePath, toFilePath), e);
         }
     }
 }

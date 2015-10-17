@@ -29,7 +29,7 @@ public class Main implements CommandLineRunner {
             return;
         }
 
-        organizer.undoFlatMess(Paths.get(args[0]), Paths.get(args[1]));
+        organizer.undoFlatMessAsync(Paths.get(args[0]), Paths.get(args[1]));
     }
 
     public static void main(String[] args) {
