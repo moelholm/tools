@@ -42,8 +42,16 @@ public class MediaOrganizer {
                 .collect(groupByYearMonthDayString()) //
                 .forEach((folderName, mediaFilePaths) -> {
                     LOG.info("Processing folder [{}] which has [{}] media files", folderName, mediaFilePaths.size());
-                    String realFolderName = generateRealFolderName(folderName, mediaFilePaths);
-                    LOG.info(" -> " + to.resolve(realFolderName));
+                    Path destinationFolderPath = to.resolve(generateRealFolderName(folderName, mediaFilePaths));
+                    mediaFilePaths.stream().forEach(p -> {
+                        Path destinationFilePath = destinationFolderPath.resolve(p.getFileName());
+                        LOG.info(destinationFilePath.toString());
+                        if (destinationFilePath.toFile().exists()) {
+                            LOG.info("File [{}] exists at destination folder - so skipping that", destinationFilePath);
+                        } else {
+
+                        }
+                    });
                 });
     }
 
