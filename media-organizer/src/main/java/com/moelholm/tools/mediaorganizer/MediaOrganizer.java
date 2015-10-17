@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -21,58 +22,45 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MediaOrganizer {
 
-    private static final String DATE_PATTERN_IN_MEDIA_FILE_NAMES = "yyyy-MM-dd HH.mm.ss";
-
     private static final Logger LOG = LoggerFactory.getLogger(MediaOrganizer.class);
+
+    @Value("${mediafiles.datepattern}")
+    private String mediaFilesDatePattern;
+
+    @Value("${mediafiles.mediaFileExtensionsToMatch}")
+    private String[] mediaFileExtensionsToMatch;
+
+    @Value("${destination.amountOfMediaFilesIndicatingAnEvent}")
+    private int amountOfMediaFilesIndicatingAnEvent;
+
+    @Value("${destination.localeForGeneratingDestinationFolderNames}")
+    private Locale locale;
+
+    @Value("${destination.suffixForDestinationFolderOfUnknownEventMediaFiles}")
+    private String suffixForDestinationFolderOfUnknownEventMediaFiles;
+
+    @Value("${destination.suffixForDestinationFolderOfMiscMediaFiles}")
+    private String suffixForDestinationFolderOfMiscMediaFiles;
 
     @Async
     public void undoFlatMess(Path from, Path to) {
         LOG.info("Copying files from [{}] to [{}]", from, to);
 
         mediaFilesFromSourcePath(from) //
-                .filter(jpegOrMov())//
+                .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
                 .forEach((folderName, mediaFilePaths) -> {
                     LOG.info("Processing folder [{}] which has [{}] media files", folderName, mediaFilePaths.size());
-                    if (mediaFilePaths.size() > 5) {
-
-                    } else {
-
-                    }
+                    String realFolderName = generateRealFolderName(folderName, mediaFilePaths);
+                    LOG.info(" -> " + to.resolve(realFolderName));
                 });
-    }
-
-    private String toYearMonthDayString(Path path) {
-        Date date = parseDateFromPathName(path);
-
-        if (date == null) {
-            return "unknown";
-        }
-
-        Calendar dateCal = Calendar.getInstance();
-        dateCal.setTime(date);
-
-        int year = dateCal.get(Calendar.YEAR);
-        String month = new DateFormatSymbols().getMonths()[dateCal.get(Calendar.MONTH) - 1];
-        int day = dateCal.get(Calendar.DAY_OF_MONTH);
-
-        return String.format("%s - %s - %s", year, month, day);
-    }
-
-    private Date parseDateFromPathName(Path path) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN_IN_MEDIA_FILE_NAMES);
-        try {
-            return sdf.parse(path.getFileName().toString());
-        } catch (ParseException e) {
-            LOG.warn("Failed to extract date from {}", path, e);
-            return null;
-        }
     }
 
     private Collector<Path, ?, Map<String, List<Path>>> groupByYearMonthDayString() {
@@ -87,10 +75,57 @@ public class MediaOrganizer {
         }
     }
 
-    private Predicate<? super Path> jpegOrMov() {
-        return p -> p.toString().toLowerCase().endsWith(".jpg") || p.toString().toLowerCase().endsWith(".mov");
+    private Predicate<? super Path> selectMediaFiles() {
+        return p -> {
+            for (String mediaFileExtensionsToMatch : mediaFileExtensionsToMatch) {
+                if (p.toString().toLowerCase().endsWith(String.format(".%s", mediaFileExtensionsToMatch))) {
+                    return true;
+                }
+            }
+            return false;
+        };
     }
 
+    private String toYearMonthDayString(Path path) {
+        Date date = parseDateFromPathName(path);
+
+        if (date == null) {
+            return "unknown";
+        }
+
+        Calendar dateCal = Calendar.getInstance();
+        dateCal.setTime(date);
+
+        int year = dateCal.get(Calendar.YEAR);
+        String month = new DateFormatSymbols(locale).getMonths()[dateCal.get(Calendar.MONTH) - 1];
+        month = Character.toUpperCase(month.charAt(0)) + month.substring(1);
+        int day = dateCal.get(Calendar.DAY_OF_MONTH);
+
+        return String.format("%s - %s - %s", year, month, day);
+    }
+
+    private String generateRealFolderName(String folderName, List<Path> mediaFilePaths) {
+        String lastPartOfFolderName = "( - \\d+)$";
+        String replaceWithNewLastPartOfFolderName;
+        if (mediaFilePaths.size() >= amountOfMediaFilesIndicatingAnEvent) {
+            replaceWithNewLastPartOfFolderName = String.format(" $1 - %s", suffixForDestinationFolderOfUnknownEventMediaFiles);
+        } else {
+            replaceWithNewLastPartOfFolderName = String.format(" - %s", suffixForDestinationFolderOfMiscMediaFiles);
+        }
+        return folderName.replaceAll(lastPartOfFolderName, replaceWithNewLastPartOfFolderName);
+    }
+
+    private Date parseDateFromPathName(Path path) {
+        SimpleDateFormat sdf = new SimpleDateFormat(mediaFilesDatePattern);
+        try {
+            return sdf.parse(path.getFileName().toString());
+        } catch (ParseException e) {
+            LOG.warn("Failed to extract date from {}", path, e);
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unused")
     private void move(Path fromFile, Path toFile) {
         try {
             Files.copy(fromFile, toFile, REPLACE_EXISTING, COPY_ATTRIBUTES, NOFOLLOW_LINKS);
