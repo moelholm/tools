@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -22,7 +21,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -31,23 +30,8 @@ public class MediaOrganizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaOrganizer.class);
 
-    @Value("${mediafiles.datepattern}")
-    private String mediaFilesDatePattern;
-
-    @Value("${mediafiles.mediaFileExtensionsToMatch}")
-    private String[] mediaFileExtensionsToMatch;
-
-    @Value("${destination.amountOfMediaFilesIndicatingAnEvent}")
-    private int amountOfMediaFilesIndicatingAnEvent;
-
-    @Value("${destination.localeForGeneratingDestinationFolderNames}")
-    private Locale locale;
-
-    @Value("${destination.suffixForDestinationFolderOfUnknownEventMediaFiles}")
-    private String suffixForDestinationFolderOfUnknownEventMediaFiles;
-
-    @Value("${destination.suffixForDestinationFolderOfMiscMediaFiles}")
-    private String suffixForDestinationFolderOfMiscMediaFiles;
+    @Autowired
+    private MediaOrganizerConfiguration configuration;
 
     @Async
     public void undoFlatMess(Path from, Path to) {
@@ -77,7 +61,7 @@ public class MediaOrganizer {
 
     private Predicate<? super Path> selectMediaFiles() {
         return p -> {
-            for (String mediaFileExtensionsToMatch : mediaFileExtensionsToMatch) {
+            for (String mediaFileExtensionsToMatch : configuration.getMediaFileExtensionsToMatch()) {
                 if (p.toString().toLowerCase().endsWith(String.format(".%s", mediaFileExtensionsToMatch))) {
                     return true;
                 }
@@ -97,7 +81,7 @@ public class MediaOrganizer {
         dateCal.setTime(date);
 
         int year = dateCal.get(Calendar.YEAR);
-        String month = new DateFormatSymbols(locale).getMonths()[dateCal.get(Calendar.MONTH) - 1];
+        String month = new DateFormatSymbols(configuration.getLocale()).getMonths()[dateCal.get(Calendar.MONTH) - 1];
         month = Character.toUpperCase(month.charAt(0)) + month.substring(1);
         int day = dateCal.get(Calendar.DAY_OF_MONTH);
 
@@ -107,16 +91,16 @@ public class MediaOrganizer {
     private String generateRealFolderName(String folderName, List<Path> mediaFilePaths) {
         String lastPartOfFolderName = "( - \\d+)$";
         String replaceWithNewLastPartOfFolderName;
-        if (mediaFilePaths.size() >= amountOfMediaFilesIndicatingAnEvent) {
-            replaceWithNewLastPartOfFolderName = String.format(" $1 - %s", suffixForDestinationFolderOfUnknownEventMediaFiles);
+        if (mediaFilePaths.size() >= configuration.getAmountOfMediaFilesIndicatingAnEvent()) {
+            replaceWithNewLastPartOfFolderName = String.format(" $1 - %s", configuration.getSuffixForDestinationFolderOfUnknownEventMediaFiles());
         } else {
-            replaceWithNewLastPartOfFolderName = String.format(" - %s", suffixForDestinationFolderOfMiscMediaFiles);
+            replaceWithNewLastPartOfFolderName = String.format(" - %s", configuration.getSuffixForDestinationFolderOfMiscMediaFiles());
         }
         return folderName.replaceAll(lastPartOfFolderName, replaceWithNewLastPartOfFolderName);
     }
 
     private Date parseDateFromPathName(Path path) {
-        SimpleDateFormat sdf = new SimpleDateFormat(mediaFilesDatePattern);
+        SimpleDateFormat sdf = new SimpleDateFormat(configuration.getMediaFilesDatePattern());
         try {
             return sdf.parse(path.getFileName().toString());
         } catch (ParseException e) {
