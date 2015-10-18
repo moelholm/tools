@@ -19,9 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@ActiveProfiles(profiles = "test")
 @SpringApplicationConfiguration(classes = Main.class)
 public class MediaOrganizerIntegrationTest {
 
@@ -88,23 +90,23 @@ public class MediaOrganizerIntegrationTest {
         organizer.undoFlatMess(from, to);
 
         // Then
-        assertPathExistsInDirectory(to, "2015 - Januar - Blandet", "2015-01-13 03.13.53.jpg");
-        assertPathNotExistsInDirectory(from, "2015 - Januar - Blandet", "2015-01-13 03.13.53.jpg");
+        assertPathExistsInDirectory(to, "2015 - January - Misc", "2015-01-13 03.13.53.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - January - Misc", "2015-01-13 03.13.53.jpg");
 
-        assertPathExistsInDirectory(to, "2015 - Marts - Blandet", "2015-03-13 06.13.54.jpg");
-        assertPathNotExistsInDirectory(from, "2015 - Marts - Blandet", "2015-03-13 06.13.54.jpg");
+        assertPathExistsInDirectory(to, "2015 - March - Misc", "2015-03-13 06.13.54.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - March - Misc", "2015-03-13 06.13.54.jpg");
 
-        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 16.13.54.mov");
-        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 16.13.54.mov");
+        assertPathExistsInDirectory(to, "2015 - October - 11 - This Must Be An Event", "2015-10-11 16.13.54.mov");
+        assertPathNotExistsInDirectory(from, "2015 - October - 11 - This Must Be An Event", "2015-10-11 16.13.54.mov");
 
-        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.00.jpg");
-        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.00.jpg");
+        assertPathExistsInDirectory(to, "2015 - October - 11 - This Must Be An Event", "2015-10-11 15.13.00.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - October - 11 - This Must Be An Event", "2015-10-11 15.13.00.jpg");
 
-        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.01.jpg");
-        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.01.jpg");
+        assertPathExistsInDirectory(to, "2015 - October - 11 - This Must Be An Event", "2015-10-11 15.13.01.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - October - 11 - This Must Be An Event", "2015-10-11 15.13.01.jpg");
 
-        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.12.jpg");
-        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.12.jpg");
+        assertPathExistsInDirectory(to, "2015 - October - 11 - This Must Be An Event", "2015-10-11 15.13.12.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - October - 11 - This Must Be An Event", "2015-10-11 15.13.12.jpg");
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------
