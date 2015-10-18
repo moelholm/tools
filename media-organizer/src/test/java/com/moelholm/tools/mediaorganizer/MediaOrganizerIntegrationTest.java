@@ -108,7 +108,7 @@ public class MediaOrganizerIntegrationTest {
 
     private Path createTestDataDirectoryAndReturnPath(String pathAsString) {
         Path path = Paths.get(pathAsString);
-        if (path.toFile().exists()) {// A-nasty-little-site-effect-ok-for-testing-!-:)-
+        if (path.toFile().exists()) {// A-nasty-little-side-effect-ok-for-testing-!-:)-
             deleteTestDataDirectory(path);
         }
         path.toFile().mkdirs();
