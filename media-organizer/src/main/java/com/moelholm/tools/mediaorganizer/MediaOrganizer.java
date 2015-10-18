@@ -112,7 +112,7 @@ public class MediaOrganizer {
         try {
             return sdf.parse(path.getFileName().toString());
         } catch (ParseException e) {
-            LOG.warn("Failed to extract date from {}", path, e);
+            LOG.warn("Failed to extract date from {} (Cause says: {})", path, e.getMessage());
             return null;
         }
     }

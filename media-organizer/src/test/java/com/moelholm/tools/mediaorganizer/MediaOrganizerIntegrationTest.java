@@ -1,5 +1,6 @@
 package com.moelholm.tools.mediaorganizer;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -42,21 +43,68 @@ public class MediaOrganizerIntegrationTest {
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
     @Test
-    public void undoFlatMess() {
+    public void undoFlatMess_whenProcessingNonMediaFiles_thenSkipsThem() {
 
         // Given
-        setupTestData();
+        addFileToDirectoryPath(from, "README.md");
+        addFileToDirectoryPath(from, "story.pdf");
 
         // When
         organizer.undoFlatMess(from, to);
 
         // Then
-        assertPathExistsInToDirectory(Paths.get("2015 - Januar - Blandet", "2015-01-13 03.13.53.jpg"));
-        assertPathExistsInToDirectory(Paths.get("2015 - Marts - Blandet", "2015-03-13 06.13.54.jpg"));
-        assertPathExistsInToDirectory(Paths.get("2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 16.13.54.mov"));
-        assertPathExistsInToDirectory(Paths.get("2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.00.jpg"));
-        assertPathExistsInToDirectory(Paths.get("2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.01.jpg"));
-        assertPathExistsInToDirectory(Paths.get("2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.12.jpg"));
+        assertPathExistsInDirectory(from, "README.md");
+        assertPathNotExistsInDirectory(to, "README.md");
+        assertPathExistsInDirectory(from, "story.pdf");
+        assertPathNotExistsInDirectory(to, "story.pdf");
+    }
+
+    @Test
+    public void undoFlatMess_whenProcessingMediaFilesWithUnparseableDates_thenMovesThemToUnknownFolder() {
+
+        // Given
+        addFileToDirectoryPath(from, "i_dont_have_a_sane_date_in_my_filename.jpg");
+
+        // When
+        organizer.undoFlatMess(from, to);
+
+        // Then
+        assertPathExistsInDirectory(to, "unknown", "i_dont_have_a_sane_date_in_my_filename.jpg");
+        assertPathNotExistsInDirectory(from, "i_dont_have_a_sane_date_in_my_filename.jpg");
+    }
+
+    @Test
+    public void undoFlatMess_whenInvoked_thenMovesMediaFiles() {
+
+        // Given
+        addFileToDirectoryPath(from, "2015-01-13 03.13.53.jpg");
+        addFileToDirectoryPath(from, "2015-03-13 06.13.54.jpg");
+        addFileToDirectoryPath(from, "2015-10-11 16.13.54.mov");
+        for (int i = 0; i < 13; i++) {
+            addFileToDirectoryPath(from, String.format("2015-10-11 15.13.%02d.jpg", i));
+        }
+
+        // When
+        organizer.undoFlatMess(from, to);
+
+        // Then
+        assertPathExistsInDirectory(to, "2015 - Januar - Blandet", "2015-01-13 03.13.53.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - Januar - Blandet", "2015-01-13 03.13.53.jpg");
+
+        assertPathExistsInDirectory(to, "2015 - Marts - Blandet", "2015-03-13 06.13.54.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - Marts - Blandet", "2015-03-13 06.13.54.jpg");
+
+        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 16.13.54.mov");
+        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 16.13.54.mov");
+
+        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.00.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.00.jpg");
+
+        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.01.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.01.jpg");
+
+        assertPathExistsInDirectory(to, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.12.jpg");
+        assertPathNotExistsInDirectory(from, "2015 - Oktober - 11 - Ukendt Haendelse", "2015-10-11 15.13.12.jpg");
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -79,21 +127,14 @@ public class MediaOrganizerIntegrationTest {
     // Private functionality
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
-    private void setupTestData() {
-        // January
-        addMediaFile(from, "2015-01-13 03.13.53.jpg");
-        // March
-        addMediaFile(from, "2015-03-13 06.13.54.jpg");
-        // October
-        addMediaFile(from, "2015-10-11 16.13.54.mov");
-        for (int i = 0; i < 13; i++) {
-            addMediaFile(from, String.format("2015-10-11 15.13.%02d.jpg", i));
-        }
+    private void assertPathExistsInDirectory(Path directoryPath, String first, String... other) {
+        Path pathInToDirectoryPath = directoryPath.resolve(Paths.get(first, other));
+        assertTrue(pathInToDirectoryPath.toFile().exists());
     }
 
-    private void assertPathExistsInToDirectory(Path path) {
-        Path pathInToDirectoryPath = to.resolve(path);
-        assertTrue(pathInToDirectoryPath.toFile().exists());
+    private void assertPathNotExistsInDirectory(Path directoryPath, String first, String... other) {
+        Path pathInToDirectoryPath = directoryPath.resolve(Paths.get(first, other));
+        assertFalse(pathInToDirectoryPath.toFile().exists());
     }
 
     private void deleteTestDataDirectory(Path path) {
@@ -115,7 +156,7 @@ public class MediaOrganizerIntegrationTest {
         return path;
     }
 
-    private void addMediaFile(Path targetDirectoryPath, String fileName) {
+    private void addFileToDirectoryPath(Path targetDirectoryPath, String fileName) {
         try {
             targetDirectoryPath.resolve(fileName).toFile().createNewFile();
         } catch (IOException e) {
