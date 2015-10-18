@@ -41,7 +41,7 @@ public class MediaOrganizer {
     public void undoFlatMess(Path from, Path to) {
         LOG.info("Copying files from [{}] to [{}]", from, to);
 
-        mediaFilesFromSourcePath(from) //
+        allFilesFromPath(from) //
                 .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
                 .forEach((folderName, mediaFilePaths) -> {
@@ -63,7 +63,7 @@ public class MediaOrganizer {
         return Collectors.groupingBy(p -> toYearMonthDayString(p));
     }
 
-    private Stream<Path> mediaFilesFromSourcePath(Path from) {
+    private Stream<Path> allFilesFromPath(Path from) {
         try {
             return Files.list(from);
         } catch (IOException e) {
