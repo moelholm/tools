@@ -1,5 +1,7 @@
 package com.moelholm.tools.mediaorganizer;
 
+import java.nio.file.Paths;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -14,16 +16,29 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 public class Main {
 
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Constants
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private static final String PROGRAM_ARG_FROM_DIR = "fromDir";
+
     private static final String PROGRAM_ARG_TO_DIR = "toDir";
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Member fields
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     @Autowired
     private MediaOrganizer organizer;
 
     @Autowired
     private Environment environment;
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
@@ -43,8 +58,13 @@ public class Main {
         String toDir = environment.getProperty(PROGRAM_ARG_TO_DIR);
 
         printApplicationStartedMessage(fromDir, toDir);
-        // organizer.undoFlatMessAsync(Paths.get(fromDir), Paths.get(toDir));
+        
+        organizer.undoFlatMessAsync(Paths.get(fromDir), Paths.get(toDir));
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Private functionality
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     private void printApplicationStartedMessage(String fromDir, String toDir) {
         LOG.info("");
