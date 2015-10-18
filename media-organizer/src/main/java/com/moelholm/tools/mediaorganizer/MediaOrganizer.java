@@ -1,9 +1,5 @@
 package com.moelholm.tools.mediaorganizer;
 
-import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +49,7 @@ public class MediaOrganizer {
                         if (destinationFilePath.toFile().exists()) {
                             LOG.info("File [{}] exists at destination folder - so skipping that", destinationFilePath.getFileName());
                         } else {
-                            copyFile(p, destinationFolderPath.resolve(p.getFileName()));
+                            moveFile(p, destinationFolderPath.resolve(p.getFileName()));
                         }
                     });
                 });
@@ -121,12 +117,18 @@ public class MediaOrganizer {
         }
     }
 
-    private void copyFile(Path fromFilePath, Path toFilePath) {
+    private void moveFile(Path fromFilePath, Path toFilePath) {
         try {
-            toFilePath.toFile().mkdirs();
-            Files.copy(fromFilePath, toFilePath, REPLACE_EXISTING, COPY_ATTRIBUTES, NOFOLLOW_LINKS);
+            ensureDirectoryStructureExists(toFilePath.getParent());
+            Files.move(fromFilePath, toFilePath);
         } catch (IOException e) {
             LOG.warn(String.format("Failed to copy file from [%s] to [%s]", fromFilePath, toFilePath), e);
+        }
+    }
+
+    private void ensureDirectoryStructureExists(Path directoryPath) {
+        if (directoryPath != null && !directoryPath.toFile().exists()) {
+            directoryPath.toFile().mkdirs();
         }
     }
 }
