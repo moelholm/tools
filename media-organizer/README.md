@@ -5,7 +5,7 @@ A tool for organizing photos and videos into my personal favorite layout.
 
 This will move all your media files from `target/input` into an organized layout under `target/output`.
  
-# Developers - read this:
+# Guide for developers
 Before you begin: Ensure that you have jdk 8 in the path.
 
 ## Run the application
