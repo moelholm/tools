@@ -24,10 +24,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class MediaOrganizer {
 
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Constants
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+
     private static final Logger LOG = LoggerFactory.getLogger(MediaOrganizer.class);
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Member fields
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     @Autowired
     private MediaOrganizerConfiguration configuration;
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     @Async
     public void undoFlatMessAsync(Path from, Path to) {
@@ -65,6 +77,10 @@ public class MediaOrganizer {
                 });
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // Private functionality
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+
     private Collector<Path, ?, Map<String, List<Path>>> groupByYearMonthDayString() {
         return Collectors.groupingBy(p -> toYearMonthDayString(p));
     }
@@ -89,7 +105,7 @@ public class MediaOrganizer {
     }
 
     private boolean isDirectoryThatDoesNotExist(Path pathToTest) {
-        return !(pathToTest.toFile().isDirectory());
+        return (pathToTest == null) || !(pathToTest.toFile().isDirectory());
     }
 
     private String toYearMonthDayString(Path path) {
