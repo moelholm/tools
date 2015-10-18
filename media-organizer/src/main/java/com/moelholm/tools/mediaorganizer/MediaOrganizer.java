@@ -35,8 +35,18 @@ public class MediaOrganizer {
     }
 
     public void undoFlatMess(Path from, Path to) {
-        LOG.info("Copying files from [{}] to [{}]", from, to);
 
+        if (isDirectoryThatDoesNotExist(from)) {
+            LOG.info("Argument [from] is not an existing directory");
+            return;
+        }
+
+        if (isDirectoryThatDoesNotExist(to)) {
+            LOG.info("Argument [to] is not an existing directory");
+            return;
+        }
+
+        LOG.info("Copying files from [{}] to [{}]", from, to);
         allFilesFromPath(from) //
                 .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
@@ -76,6 +86,10 @@ public class MediaOrganizer {
             }
             return false;
         };
+    }
+
+    private boolean isDirectoryThatDoesNotExist(Path pathToTest) {
+        return !(pathToTest.toFile().isDirectory());
     }
 
     private String toYearMonthDayString(Path path) {
