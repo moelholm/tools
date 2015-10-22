@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MediaOrganizerConfiguration {
 
+    @Value("${daemon.scheduleAsCronExpression}")
+    private String scheduleAsCronExpression;
+
     @Value("${mediafiles.datepattern}")
     private String mediaFilesDatePattern;
 
@@ -48,6 +51,10 @@ public class MediaOrganizerConfiguration {
 
     public String getSuffixForDestinationFolderOfMiscMediaFiles() {
         return suffixForDestinationFolderOfMiscMediaFiles;
+    }
+
+    public String getScheduleAsCronExpression() {
+        return scheduleAsCronExpression;
     }
 
 }

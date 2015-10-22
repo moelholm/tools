@@ -11,6 +11,10 @@ Before you begin: Ensure that you have jdk 8 in the path.
 ## Run the application
 `mvn spring-boot:run -Drun.arguments="--fromDir=/path/to/source --toDir=/path/to/destination"`
 
+You can also run the application with the `--daemon` flag. It will:
+- Start the application as a daemon (running until explicitly closed)
+- Schedule the organizing process to run according to whatever has been configured in `application.properties` (see the application sources for examples).  
+ 
 ## Test
 `mvn test`
 ( Runs all unit tests and integration tests )

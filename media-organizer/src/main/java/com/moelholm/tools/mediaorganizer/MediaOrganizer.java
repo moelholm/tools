@@ -3,6 +3,7 @@ package com.moelholm.tools.mediaorganizer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,7 +19,10 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,9 +41,26 @@ public class MediaOrganizer {
     @Autowired
     private MediaOrganizerConfiguration configuration;
 
+    @Autowired
+    private TaskScheduler scheduler;
+
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // Public API
     // --------------------------------------------------------------------------------------------------------------------------------------------
+
+    public void scheduleJobThatUndoesFlatMess(Path from, Path to) {
+
+        if (hasInvalidParameters(from, to)) {
+            return;
+        }
+
+        CronTrigger trigger = new CronTrigger(configuration.getScheduleAsCronExpression());
+        scheduler.schedule(() -> undoFlatMess(from, to), trigger);
+
+        LOG.info("Scheduled job that will move files from [{}] to [{}]", from, to);
+        Date nextExecutionTime = trigger.nextExecutionTime(new SimpleTriggerContext());
+        LOG.info("    - Job will start at [{}]", formatDateAsString(nextExecutionTime));
+    }
 
     @Async
     public void undoFlatMessAsync(Path from, Path to) {
@@ -48,17 +69,11 @@ public class MediaOrganizer {
 
     public void undoFlatMess(Path from, Path to) {
 
-        if (isDirectoryThatDoesNotExist(from)) {
-            LOG.info("Argument [from] is not an existing directory");
+        if (hasInvalidParameters(from, to)) {
             return;
         }
 
-        if (isDirectoryThatDoesNotExist(to)) {
-            LOG.info("Argument [to] is not an existing directory");
-            return;
-        }
-
-        LOG.info("Copying files from [{}] to [{}]", from, to);
+        LOG.info("Moving files from [{}] to [{}]", from, to);
         allFilesFromPath(from) //
                 .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
@@ -95,6 +110,7 @@ public class MediaOrganizer {
 
     private Predicate<? super Path> selectMediaFiles() {
         return p -> {
+            // TODO functionalize ;)
             for (String mediaFileExtensionsToMatch : configuration.getMediaFileExtensionsToMatch()) {
                 if (p.toString().toLowerCase().endsWith(String.format(".%s", mediaFileExtensionsToMatch))) {
                     return true;
@@ -102,6 +118,23 @@ public class MediaOrganizer {
             }
             return false;
         };
+    }
+
+    private boolean hasInvalidParameters(Path from, Path to) {
+
+        boolean result = false;
+
+        if (isDirectoryThatDoesNotExist(from)) {
+            LOG.info("Argument [from] is not an existing directory");
+            result = true;
+        }
+
+        if (isDirectoryThatDoesNotExist(to)) {
+            LOG.info("Argument [to] is not an existing directory");
+            result = true;
+        }
+
+        return result;
     }
 
     private boolean isDirectoryThatDoesNotExist(Path pathToTest) {
@@ -145,6 +178,10 @@ public class MediaOrganizer {
             LOG.warn("Failed to extract date from {} (Cause says: {})", path, e.getMessage());
             return null;
         }
+    }
+
+    private String formatDateAsString(Date date) {
+        return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(date);
     }
 
     private void moveFile(Path fromFilePath, Path toFilePath) {
