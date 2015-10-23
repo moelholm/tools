@@ -1,6 +1,7 @@
 package com.moelholm.tools.mediaorganizer;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -78,6 +79,9 @@ public class DropboxFileSystem implements FileSystem {
             DropboxMoveRequest dropBoxRequest = new DropboxMoveRequest(fromDropboxPath, toDropboxPath);
             postToDropboxAndGetResponse("/files/move", dropBoxRequest, DropboxFile.class);
         } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new FileAlreadyExistsException(to.toString());
+            }
             throw asRuntimeException(e);
         } catch (Exception e) {
             throw new IOException(e);
