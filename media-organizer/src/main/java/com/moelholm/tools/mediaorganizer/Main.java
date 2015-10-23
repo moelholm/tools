@@ -28,6 +28,8 @@ public class Main {
 
     private static final String PROGRAM_ARG_DAEMON_RUNMODE = "daemon";
 
+    private static final String PROGRAM_ARG_FILESYSTEM_TYPE = "filesystemtype";
+
     private static final String PROGRAM_ARG_FROM_DIR = "fromDir";
 
     private static final String PROGRAM_ARG_TO_DIR = "toDir";
@@ -51,6 +53,15 @@ public class Main {
         return new ThreadPoolTaskScheduler();
     }
 
+    @Bean
+    public FileSystem fileSystem() {
+        if (FileSystemType.LOCAL == FileSystemType.fromString(environment.getProperty(PROGRAM_ARG_FILESYSTEM_TYPE))) {
+            return new LocalFileSystem();
+        } else {
+            return new DropboxFileSystem();
+        }
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // Public API
     // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,10 +81,11 @@ public class Main {
         }
 
         boolean daemonRunMode = environment.containsProperty(PROGRAM_ARG_DAEMON_RUNMODE);
+        FileSystemType fileSystemType = FileSystemType.fromString(environment.getProperty(PROGRAM_ARG_FILESYSTEM_TYPE));
         String fromDir = environment.getProperty(PROGRAM_ARG_FROM_DIR);
         String toDir = environment.getProperty(PROGRAM_ARG_TO_DIR);
 
-        printApplicationStartedMessage(fromDir, toDir, daemonRunMode);
+        printApplicationStartedMessage(fromDir, toDir, daemonRunMode, fileSystemType);
 
         if (daemonRunMode) {
             organizer.scheduleJobThatUndoesFlatMess(Paths.get(fromDir), Paths.get(toDir));
@@ -86,10 +98,11 @@ public class Main {
     // Private functionality
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
-    private void printApplicationStartedMessage(String fromDir, String toDir, boolean daemonRunMode) {
+    private void printApplicationStartedMessage(String fromDir, String toDir, boolean daemonRunMode, FileSystemType fileSystemType) {
         LOG.info("");
         LOG.info("Application started with the following arguments:");
         LOG.info("    --{} ? {}", PROGRAM_ARG_DAEMON_RUNMODE, daemonRunMode ? "yes" : "no");
+        LOG.info("    --{} = {}", PROGRAM_ARG_FILESYSTEM_TYPE, fileSystemType.toString().toLowerCase());
         LOG.info("    --{} = {}", PROGRAM_ARG_FROM_DIR, fromDir);
         LOG.info("    --{}   = {}", PROGRAM_ARG_TO_DIR, toDir);
         LOG.info("");
@@ -97,13 +110,14 @@ public class Main {
 
     private void printUsage() {
         LOG.info("");
-        LOG.info("Usage: Main --{}=[dir to copy from] --{}=[dir to copy to] [--daemon]", PROGRAM_ARG_FROM_DIR, PROGRAM_ARG_TO_DIR);
+        LOG.info("Usage: Main --{}=[dir to copy from] --{}=[dir to copy to] [--daemon] [--{}=[type]]", PROGRAM_ARG_FROM_DIR, PROGRAM_ARG_TO_DIR, PROGRAM_ARG_FILESYSTEM_TYPE);
         LOG.info("");
         LOG.info("  Where:");
         LOG.info("");
         LOG.info("    --{} specifies the folder that contains your media files", PROGRAM_ARG_FROM_DIR);
         LOG.info("    --{}   specifies the folder that should contain the organized media files", PROGRAM_ARG_TO_DIR);
         LOG.info("    --{}   specifies if the application should run as a daemon", PROGRAM_ARG_DAEMON_RUNMODE);
+        LOG.info("    --{}   specifies the filesystem: 'local' or 'dropbox' (without quotes)", PROGRAM_ARG_FILESYSTEM_TYPE);
         LOG.info("");
     }
 }

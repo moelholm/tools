@@ -1,7 +1,7 @@
 package com.moelholm.tools.mediaorganizer;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +42,9 @@ public class MediaOrganizer {
 
     @Autowired
     private TaskScheduler scheduler;
+
+    @Autowired
+    private FileSystem fileSystem;
 
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // Public API
@@ -74,38 +76,25 @@ public class MediaOrganizer {
         }
 
         LOG.info("Moving files from [{}] to [{}]", from, to);
-        allFilesFromPath(from) //
+        fileSystem.streamOfAllFilesFromPath(from) //
                 .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
                 .forEach((folderName, mediaFilePaths) -> {
                     LOG.info("Processing folder [{}] which has [{}] media files", folderName, mediaFilePaths.size());
                     Path destinationFolderPath = to.resolve(generateRealFolderName(folderName, mediaFilePaths));
-                    mediaFilePaths.stream().forEach(p -> {
+                    mediaFilePaths.parallelStream().forEach(p -> {
                         Path destinationFilePath = destinationFolderPath.resolve(p.getFileName());
                         LOG.info("    {}", destinationFilePath.getFileName());
-                        if (destinationFilePath.toFile().exists()) {
-                            LOG.info("File [{}] exists at destination folder - so skipping that", destinationFilePath.getFileName());
-                        } else {
-                            moveFile(p, destinationFolderPath.resolve(p.getFileName()));
-                        }
+                        move(p, destinationFolderPath.resolve(p.getFileName()));
                     });
                 });
     }
-
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // Private functionality
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
     private Collector<Path, ?, Map<String, List<Path>>> groupByYearMonthDayString() {
         return Collectors.groupingBy(p -> toYearMonthDayString(p));
-    }
-
-    private Stream<Path> allFilesFromPath(Path from) {
-        try {
-            return Files.list(from);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private Predicate<? super Path> selectMediaFiles() {
@@ -124,21 +113,17 @@ public class MediaOrganizer {
 
         boolean result = false;
 
-        if (isDirectoryThatDoesNotExist(from)) {
+        if (!fileSystem.isExistingDirectory(from)) {
             LOG.info("Argument [from] is not an existing directory");
             result = true;
         }
 
-        if (isDirectoryThatDoesNotExist(to)) {
+        if (!fileSystem.isExistingDirectory(to)) {
             LOG.info("Argument [to] is not an existing directory");
             result = true;
         }
 
         return result;
-    }
-
-    private boolean isDirectoryThatDoesNotExist(Path pathToTest) {
-        return (pathToTest == null) || !(pathToTest.toFile().isDirectory());
     }
 
     private String toYearMonthDayString(Path path) {
@@ -184,18 +169,13 @@ public class MediaOrganizer {
         return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(date);
     }
 
-    private void moveFile(Path fromFilePath, Path toFilePath) {
+    private void move(Path fileToMove, Path pathFileShouldBeMovedTo) {
         try {
-            ensureDirectoryStructureExists(toFilePath.getParent());
-            Files.move(fromFilePath, toFilePath);
+            fileSystem.move(fileToMove, pathFileShouldBeMovedTo);
+        } catch (FileAlreadyExistsException e) {
+            LOG.info("File [{}] exists at destination folder - so skipping that", pathFileShouldBeMovedTo.getFileName());
         } catch (IOException e) {
-            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", fromFilePath, toFilePath), e);
-        }
-    }
-
-    private void ensureDirectoryStructureExists(Path directoryPath) {
-        if (directoryPath != null && !directoryPath.toFile().exists()) {
-            directoryPath.toFile().mkdirs();
+            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", pathFileShouldBeMovedTo, pathFileShouldBeMovedTo), e);
         }
     }
 }

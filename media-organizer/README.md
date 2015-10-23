@@ -15,6 +15,11 @@ You can also run the application with the `--daemon` flag. It will:
 - Start the application as a daemon (running until explicitly closed)
 - Schedule the organizing process to run according to whatever has been configured in `application.properties` (see the application sources for examples).  
  
+Want to try out with Dropbox? Then:
+- Use the `--filesystemtype=dropbox` flag
+- And set the System property `-Ddropbox.accessToken=[your-own-token]`.
+( you can get a token for your own Dropbox account )
+ 
 ## Test
 `mvn test`
 ( Runs all unit tests and integration tests )
