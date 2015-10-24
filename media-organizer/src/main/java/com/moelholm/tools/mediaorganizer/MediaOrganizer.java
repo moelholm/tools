@@ -52,7 +52,7 @@ public class MediaOrganizer {
     // Public API
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
-    public void scheduleJobThatUndoesFlatMess(Path from, Path to) {
+    public void scheduleUndoFlatMess(Path from, Path to) {
 
         if (hasInvalidParameters(from, to)) {
             return;
@@ -67,7 +67,7 @@ public class MediaOrganizer {
     }
 
     @Async
-    public void undoFlatMessAsync(Path from, Path to) {
+    public void asyncUndoFlatMess(Path from, Path to) {
         undoFlatMess(from, to);
     }
 

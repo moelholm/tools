@@ -63,9 +63,9 @@ public class Main {
         printApplicationStartedMessage(fromDir, toDir, daemonRunMode, fileSystemType);
 
         if (daemonRunMode) {
-            organizer.scheduleJobThatUndoesFlatMess(Paths.get(fromDir), Paths.get(toDir));
+            organizer.scheduleUndoFlatMess(Paths.get(fromDir), Paths.get(toDir));
         } else {
-            organizer.undoFlatMessAsync(Paths.get(fromDir), Paths.get(toDir));
+            organizer.asyncUndoFlatMess(Paths.get(fromDir), Paths.get(toDir));
         }
     }
 
