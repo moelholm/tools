@@ -78,13 +78,19 @@ public class MediaOrganizer {
         }
 
         LOG.info("Moving files from [{}] to [{}]", from, to);
+
         fileSystem.streamOfAllFilesFromPath(from) //
                 .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
-                .forEach((yearMonthDayString, mediaFilePaths) -> {
-                    LOG.info("Processing [{}] which has [{}] media files", yearMonthDayString, mediaFilePaths.size());
-                    Path destinationFolderPath = to.resolve(generateRealFolderName(yearMonthDayString, mediaFilePaths));
-                    mediaFilePaths.parallelStream()//
+                .forEach((yearMonthDayString, mediaFilePathList) -> {
+
+                    LOG.info("Processing [{}] which has [{}] media files", yearMonthDayString, mediaFilePathList.size());
+
+                    String destinationDirectoryName = generateFinalDestinationDirectoryName(yearMonthDayString, mediaFilePathList);
+
+                    Path destinationFolderPath = to.resolve(destinationDirectoryName);
+
+                    mediaFilePathList.parallelStream()//
                             .forEach(p -> move(p, destinationFolderPath.resolve(p.getFileName())));
                 });
     }
@@ -136,7 +142,7 @@ public class MediaOrganizer {
         return String.format("%s - %s - %s", year, month, day);
     }
 
-    private String generateRealFolderName(String folderName, List<Path> mediaFilePaths) {
+    private String generateFinalDestinationDirectoryName(String folderName, List<Path> mediaFilePaths) {
         String lastPartOfFolderName = "( - \\d+)$";
         String replaceWithNewLastPartOfFolderName;
         if (mediaFilePaths.size() >= configuration.getAmountOfMediaFilesIndicatingAnEvent()) {
