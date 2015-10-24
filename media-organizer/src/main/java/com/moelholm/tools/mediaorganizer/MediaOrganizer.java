@@ -24,6 +24,8 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Component;
 
+import com.moelholm.tools.mediaorganizer.filesystem.FileSystem;
+
 @Component
 public class MediaOrganizer {
 

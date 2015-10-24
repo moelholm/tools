@@ -1,4 +1,4 @@
-package com.moelholm.tools.mediaorganizer;
+package com.moelholm.tools.mediaorganizer.filesystem;
 
 import java.io.IOException;
 import java.nio.file.Files;
