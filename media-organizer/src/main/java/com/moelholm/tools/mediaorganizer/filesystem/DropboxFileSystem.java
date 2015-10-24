@@ -61,9 +61,9 @@ public class DropboxFileSystem implements FileSystem {
             String dropboxPathToTest = toAbsoluteDropboxPath(from);
             DropboxFileRequest dropBoxRequest = new DropboxFileRequest(dropboxPathToTest);
             DropboxListFolderResponse listFolderResponse = postToDropboxAndGetResponse("/files/list_folder", dropBoxRequest, DropboxListFolderResponse.class);
-            return listFolderResponse.getDropboxFiles()//
-                    .stream()//
-                    .map(f -> Paths.get(f.getPathLower()));
+            return listFolderResponse.getDropboxFiles().stream()//
+                    .map(DropboxFile::getPathLower)//
+                    .map(Paths::get);
         } catch (HttpClientErrorException e) {
             throw asRuntimeException(e);
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class DropboxFileSystem implements FileSystem {
 
         @Override
         public String toString() {
-            return dropboxFiles.stream().map(d -> d.toString()).collect(Collectors.joining("\n"));
+            return dropboxFiles.stream().map(DropboxFile::toString).collect(Collectors.joining("\n"));
         }
 
         public List<DropboxFile> getDropboxFiles() {

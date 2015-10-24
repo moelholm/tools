@@ -115,12 +115,14 @@ public class MediaOrganizerIntegrationTest {
 
     @After
     public void after() {
+        LOG.info("Test stopped");
         deleteTestDataDirectory(from);
         deleteTestDataDirectory(to);
     }
 
     @Before
     public void before() throws IOException {
+        LOG.info("Test started");
         from = createTestDataDirectoryAndReturnPath("target/testground-from");
         to = createTestDataDirectoryAndReturnPath("target/testground-to");
     }
@@ -140,6 +142,7 @@ public class MediaOrganizerIntegrationTest {
     }
 
     private void deleteTestDataDirectory(Path path) {
+        LOG.info("    Deleting {}", path);
         if (path.toFile().exists()) {
             try {
                 Files.walkFileTree(path, new FileDeleterVisitor());
@@ -170,14 +173,14 @@ public class MediaOrganizerIntegrationTest {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Files.delete(file);
-            LOG.info("Deleted {}", file.getFileName());
+            LOG.info("        Deleted {}", file.getFileName());
             return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
             Files.delete(dir);
-            LOG.info("Deleted {}", dir.getFileName());
+            LOG.info("        Deleted {}", dir.getFileName());
             return FileVisitResult.CONTINUE;
         }
     }

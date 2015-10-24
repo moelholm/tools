@@ -81,14 +81,11 @@ public class MediaOrganizer {
         fileSystem.streamOfAllFilesFromPath(from) //
                 .filter(selectMediaFiles())//
                 .collect(groupByYearMonthDayString()) //
-                .forEach((folderName, mediaFilePaths) -> {
-                    LOG.info("Processing folder [{}] which has [{}] media files", folderName, mediaFilePaths.size());
-                    Path destinationFolderPath = to.resolve(generateRealFolderName(folderName, mediaFilePaths));
-                    mediaFilePaths.parallelStream().forEach(p -> {
-                        Path destinationFilePath = destinationFolderPath.resolve(p.getFileName());
-                        LOG.info("    {}", destinationFilePath.getFileName());
-                        move(p, destinationFolderPath.resolve(p.getFileName()));
-                    });
+                .forEach((yearMonthDayString, mediaFilePaths) -> {
+                    LOG.info("Processing [{}] which has [{}] media files", yearMonthDayString, mediaFilePaths.size());
+                    Path destinationFolderPath = to.resolve(generateRealFolderName(yearMonthDayString, mediaFilePaths));
+                    mediaFilePaths.parallelStream()//
+                            .forEach(p -> move(p, destinationFolderPath.resolve(p.getFileName())));
                 });
     }
     // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,8 +97,7 @@ public class MediaOrganizer {
     }
 
     private Predicate<? super Path> selectMediaFiles() {
-        return path -> configuration.getMediaFileExtensionsToMatch()//
-                .stream()//
+        return path -> configuration.getMediaFileExtensionsToMatch().stream()//
                 .anyMatch(fileExtension -> path.toString().toLowerCase().endsWith(String.format(".%s", fileExtension)));
     }
 
@@ -165,13 +161,14 @@ public class MediaOrganizer {
         return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(date);
     }
 
-    private void move(Path fileToMove, Path pathFileShouldBeMovedTo) {
+    private void move(Path fileToMove, Path pathThatFileShouldBeMovedTo) {
         try {
-            fileSystem.move(fileToMove, pathFileShouldBeMovedTo);
+            LOG.info("    {}", pathThatFileShouldBeMovedTo.getFileName());
+            fileSystem.move(fileToMove, pathThatFileShouldBeMovedTo);
         } catch (FileAlreadyExistsException e) {
-            LOG.info("File [{}] exists at destination folder - so skipping that", pathFileShouldBeMovedTo.getFileName());
+            LOG.info("File [{}] exists at destination folder - so skipping that", pathThatFileShouldBeMovedTo.getFileName());
         } catch (IOException e) {
-            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", pathFileShouldBeMovedTo, pathFileShouldBeMovedTo), e);
+            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", pathThatFileShouldBeMovedTo, pathThatFileShouldBeMovedTo), e);
         }
     }
 }
