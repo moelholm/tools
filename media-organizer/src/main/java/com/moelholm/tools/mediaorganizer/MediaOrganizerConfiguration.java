@@ -1,5 +1,7 @@
 package com.moelholm.tools.mediaorganizer;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +35,8 @@ public class MediaOrganizerConfiguration {
         return mediaFilesDatePattern;
     }
 
-    public String[] getMediaFileExtensionsToMatch() {
-        return mediaFileExtensionsToMatch;
+    public List<String> getMediaFileExtensionsToMatch() {
+        return Arrays.asList(mediaFileExtensionsToMatch);
     }
 
     public int getAmountOfMediaFilesIndicatingAnEvent() {

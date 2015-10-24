@@ -100,15 +100,7 @@ public class MediaOrganizer {
     }
 
     private Predicate<? super Path> selectMediaFiles() {
-        return p -> {
-            // TODO functionalize ;)
-            for (String mediaFileExtensionsToMatch : configuration.getMediaFileExtensionsToMatch()) {
-                if (p.toString().toLowerCase().endsWith(String.format(".%s", mediaFileExtensionsToMatch))) {
-                    return true;
-                }
-            }
-            return false;
-        };
+        return p -> configuration.getMediaFileExtensionsToMatch().stream().anyMatch(s -> p.toString().toLowerCase().endsWith(String.format(".%s", s)));
     }
 
     private boolean hasInvalidParameters(Path from, Path to) {
