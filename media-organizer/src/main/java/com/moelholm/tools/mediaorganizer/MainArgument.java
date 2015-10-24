@@ -8,7 +8,7 @@ public enum MainArgument {
         this.argumentName = argumentName;
     }
 
-    private String argumentName;
+    private final String argumentName;
 
     public String getArgumentName() {
         return argumentName;
