@@ -20,7 +20,8 @@ You can also run the application with the `--daemon` flag. It will:
 Want to try out with Dropbox? Then:
 - Use the `--filesystemtype=dropbox` flag
 - And set the System property `-Ddropbox.accessToken=[your-own-token]`.
-( you can get a token for your own Dropbox account )
+
+( to use this feature you need to get your own token for your Dropbox account )
  
 ## Test
 `mvn test`
