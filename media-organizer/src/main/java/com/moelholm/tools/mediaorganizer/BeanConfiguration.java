@@ -12,7 +12,7 @@ import com.moelholm.tools.mediaorganizer.filesystem.FileSystemType;
 import com.moelholm.tools.mediaorganizer.filesystem.LocalFileSystem;
 
 @Configuration
-public class AppConfig {
+public class BeanConfiguration {
 
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // Member fields
