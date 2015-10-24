@@ -88,10 +88,10 @@ public class MediaOrganizer {
 
                     String destinationDirectoryName = generateFinalDestinationDirectoryName(yearMonthDayString, mediaFilePathList);
 
-                    Path destinationFolderPath = to.resolve(destinationDirectoryName);
+                    Path destinationDirectoryPath = to.resolve(destinationDirectoryName);
 
                     mediaFilePathList.parallelStream()//
-                            .forEach(p -> move(p, destinationFolderPath.resolve(p.getFileName())));
+                            .forEach(mediaFilePath -> move(mediaFilePath, destinationDirectoryPath.resolve(mediaFilePath.getFileName())));
                 });
     }
     // --------------------------------------------------------------------------------------------------------------------------------------------
