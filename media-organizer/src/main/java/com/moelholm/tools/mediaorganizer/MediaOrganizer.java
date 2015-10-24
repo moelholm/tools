@@ -99,7 +99,7 @@ public class MediaOrganizer {
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
     private Collector<Path, ?, Map<String, List<Path>>> groupByYearMonthDayString() {
-        return Collectors.groupingBy(p -> toYearMonthDayString(p));
+        return Collectors.groupingBy(this::toYearMonthDayString);
     }
 
     private Predicate<? super Path> selectMediaFiles() {
