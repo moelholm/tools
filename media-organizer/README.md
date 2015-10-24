@@ -1,9 +1,11 @@
 A tool for organizing photos and videos into my personal favorite layout.
 
 # Run with Docker ( users )
-`docker run -v target/input:/mnt/input -v target/output:/mnt/output nickymoelholm/media-organizer`
+`docker run -e "FROMDIR=/mnt/input" -e "TODIR=/mnt/output" -v target/input:/mnt/input -v target/output:/mnt/output nickymoelholm/media-organizer`
 
 This will move all your media files from `target/input` into an organized layout under `target/output`.
+( the -e arguments is what tells the tool to actually look under `/mnt/input` and `/mnt/output` inside the docker container )
+( the -v arguments is how you map your real disk folders into `/mnt/input` and `/mnt/output` inside the docker container )
  
 # Guide for developers
 Before you begin: Ensure that you have jdk 8 in the path.
