@@ -174,7 +174,7 @@ public class MediaOrganizer {
         } catch (FileAlreadyExistsException e) {
             LOG.info("File [{}] exists at destination folder - so skipping that", pathThatFileShouldBeMovedTo.getFileName());
         } catch (IOException e) {
-            LOG.warn(String.format("Failed to copy file from [%s] to [%s]", pathThatFileShouldBeMovedTo, pathThatFileShouldBeMovedTo), e);
+            LOG.warn(String.format("Failed to move file from [%s] to [%s]", pathThatFileShouldBeMovedTo, pathThatFileShouldBeMovedTo), e);
         }
     }
 }
