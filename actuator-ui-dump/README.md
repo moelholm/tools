@@ -3,9 +3,12 @@ This project adds an HTML based UI to the Spring Actuator `/dump` output (raw JS
 
 ## Installation 
 Install it into your own Spring Boot project:
-- First GIT clone this repository 
-- Then `mvn clean install` ( with jdk8 in your path )
-- And finally add the following to your own Spring Boot Maven POM:
+
+First GIT clone this repository.
+ 
+Then `mvn clean install` ( with jdk8 in your path ).
+
+And finally add the following to your own Spring Boot Maven POM:
 
 	<groupId>com.moelholm.tools</groupId>
 	<artifactId>actuator-ui-dump</artifactId>
