@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Thread dump</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" href="/webjars/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="/webjars/jquery/2.1.4/jquery.min.js"></script>
+<style type="text/css">
+<!--
+.tab {
+	margin-left: 40px;
+}
+-->
+</style>
+<script type="text/javascript">
+function printThreadHeader(thread) {
+	var header = "<h4>" 
+		+ thread.threadName
+		+ "<small>" 
+		+ " [id=" +thread.threadId+ "]"
+		+ " [state=" +thread.threadState+ "]"
+		+ "</small>"
+		+ "</h4>";
+	$('.threads').append(header);
+}
+function printStackTrace(thread) {
+	for (j = 0; j < thread.stackTrace.length; j++) {
+	     var method = thread.stackTrace[j];
+	     var id = thread.threadId + "_" + j;
+	     var info = j > 0 ? " at " : "";
+	     info += method.className;
+	     info += ".";
+	     info += method.methodName;
+	     info += "(";
+	     info += method.fileName;
+	     info += ":";
+	     info += method.nativeMethod ? "native" : method.lineNumber;
+	     info += ")";
+	     $('.threads').append("<div id="+id+" class='tab'>" + info + "</div>");
+	 }
+	 for(k = 0; k < thread.lockedMonitors.length; k++) {
+		 var monitor = thread.lockedMonitors[k];
+		 var lockInfo = monitor.className + "[identityHashCode=" + monitor.identityHashCode + "]";
+		 var node = $('#'+thread.threadId + '_' + monitor.lockedStackDepth);
+		 node.addClass("text-danger");
+		 var lockNode = $("<div class='tab tab'> &#9759; Took intrinsic lock " + lockInfo + "</div>").insertBefore(node);
+		 lockNode.addClass("text-muted");
+	 }
+}
+
+$(document).ready(function() {
+    $.ajax({
+        url: "/dump"
+    }).then(function(threads) {
+        for (i = 0; i < threads.length; i++) {
+        	printThreadHeader(threads[i]);
+       		printStackTrace(threads[i]);
+        }
+    });
+});
+</script>
+</head>
+<body>
+	<div class="container-fluid">
+		<p class="threads"></p>
+	</div>
+</body>
+</html>
