@@ -15,9 +15,7 @@ Boot up - and point your browser to: `http://localhost:8080/dump-ui`.
 ( You can override the `dump-ui` resource location by defining property `actuator-ui.dump-ui.path` ) 
 
 ## Details
-It will pull in `bootstrap` and `jquery` for doing the hard work.
-
-Limitation: Currently the tool only supports accessing the thread dump JSON output at `/dump`   
+It will pull in `bootstrap` and `jquery` for doing the hard work.  
 
 ## Build
 Thin JAR:
