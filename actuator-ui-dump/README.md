@@ -5,10 +5,12 @@ This project adds an HTML based UI to the Spring Actuator `/dump` output (raw JS
 Install it into your own Spring Boot project:
 
 Add the following to your own Spring Boot Maven POM:
-
-	<groupId>com.moelholm.tools</groupId>
-	<artifactId>actuator-ui-dump</artifactId>
-	<version>0.2</version>
+	
+	<dependency>
+		<groupId>com.moelholm.tools</groupId>
+		<artifactId>actuator-ui-dump</artifactId>
+		<version>0.2</version>
+	</dependency>
 
 Boot up - and point your browser to: `http://localhost:8080/dump-ui`.
 
