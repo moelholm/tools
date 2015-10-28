@@ -1,5 +1,7 @@
 # About
-This project adds an HTML based UI to the Spring Actuator `/dump` output (raw JSON).
+This project adds an HTML based UI to the Spring Actuator `/dump` output (raw JSON):
+
+![Image](https://github.com/nickymoelholm/documentation/blob/master/actuator-ui-dump/dump-ui.png?raw=true)
 
 ## Installation 
 Install it into your own Spring Boot project:
