@@ -1,0 +1,44 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.1.RELEASE'
+		prometheusVersion = '0.0.16'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+jar {
+	baseName = 'prometheus-spring-boot-starter'
+	version = '1.0.0-SNAPSHOT'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+
+	compile "org.springframework.boot:spring-boot-starter-actuator"
+	compile "org.springframework.boot:spring-boot-starter-web"
+
+	compile "io.prometheus:simpleclient:${prometheusVersion}"
+	compile "io.prometheus:simpleclient_hotspot:${prometheusVersion}"
+	compile "io.prometheus:simpleclient_spring_boot:${prometheusVersion}"
+
+	testCompile "org.springframework.boot:spring-boot-starter-test"
+
+}
+
+bootRepackage {
+    enabled = false
+}
